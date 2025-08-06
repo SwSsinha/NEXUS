@@ -1,19 +1,26 @@
-import { UserModel } from '../models'; // Import from your consolidated models/index.ts or individual User.ts
+import { UserModel } from '../models'; // Import the updated UserModel
 import jwt from 'jsonwebtoken';
-import { JWT_PASSWORD } from '../config'; // Import JWT secret
+import { JWT_PASSWORD } from '../config';
+import bcrypt from 'bcryptjs'; // Import bcrypt for comparison
 
 /**
- * Creates a new user in the database.
+ * Creates a new user in the database with a pre-hashed password.
  * @param username - The username for the new user.
- * @param password - The password for the new user (should be hashed in a real app).
+ * @param hashedPassword - The securely hashed password for the new user.
+ * @param firstName - The first name of the new user.
+ * @param lastName - The last name of the new user.
  * @returns An object indicating success/failure and a message.
  */
-export const createNewUser = async (username: string, password: string) => {
+export const createNewUser = async (username: string, hashedPassword: string, firstName: string, lastName: string) => {
     try {
-        const newUser = await UserModel.create({ username, password });
+        const newUser = await UserModel.create({
+            username,
+            password: hashedPassword,
+            firstName,
+            lastName
+        });
         return { success: true, message: "User signed up", user: newUser };
     } catch (e: any) {
-        // Check for duplicate key error (MongoDB E11000)
         if (e.code === 11000) {
             return { success: false, message: "User already exists" };
         }
@@ -23,20 +30,21 @@ export const createNewUser = async (username: string, password: string) => {
 };
 
 /**
- * Authenticates a user and generates a JWT token.
+ * Authenticates a user by comparing the provided password with the stored hash.
  * @param username - The username to authenticate.
- * @param password - The password to authenticate (should be compared with hash in a real app).
+ * @param password - The plaintext password to authenticate.
  * @returns An object indicating success/failure and a token or message.
  */
 export const authenticateUser = async (username: string, password: string) => {
-    const existingUser = await UserModel.findOne({ username, password });
+    const existingUser = await UserModel.findOne({ username });
 
     if (existingUser) {
-        // IMPORTANT: In a real application, you MUST hash the password (e.g., using bcrypt)
-        // and compare the hashed password here, not plain text.
-        const token = jwt.sign({ id: existingUser._id }, JWT_PASSWORD);
-        return { success: true, token };
-    } else {
-        return { success: false, message: "Incorrect credentials" };
+        // Compare the provided password (plaintext) with the hashed password from the database
+        const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+        if (isPasswordCorrect) {
+            const token = jwt.sign({ id: existingUser._id }, JWT_PASSWORD);
+            return { success: true, token };
+        }
     }
+    return { success: false, message: "Incorrect credentials" };
 };
