@@ -46,9 +46,10 @@ export const scrapeUrlForMetadata = async (url: string) => {
  * @param type - The type of content (e.g., "article", "video").
  * @param title - The title of the content.
  * @param userId - The ID of the user adding the content.
+ * @param tags - An optional array of tags for the content.
  * @returns An object indicating success/failure and a message.
  */
-export const addContentToBrain = async (link: string, type: string, title: string, userId: string) => {
+export const addContentToBrain = async (link: string, type: string, title: string, userId: string, tags?: string[]) => {
     try {
         const metadata = await scrapeUrlForMetadata(link);
 
@@ -60,7 +61,7 @@ export const addContentToBrain = async (link: string, type: string, title: strin
             scrapedDescription: metadata.description,
             scrapedImage: metadata.image,
             userId: userId,
-            tags: []
+            tags: tags || []
         });
 
         return { success: true, message: "Content added", content: newContent };

@@ -1,6 +1,7 @@
 // src/models/Content.ts
 
 import mongoose, { model, Schema } from "mongoose";
+import { string } from "zod";
 
 const ContentSchema = new Schema({
     title: { type: String, required: false },
@@ -11,6 +12,7 @@ const ContentSchema = new Schema({
     scrapedTitle: { type: String, default: '' },
     scrapedDescription: { type: String, default: '' },
     scrapedImage: { type: String, default: '' },
+    tags : {type: [String] , default : []}
 });
 
 export const ContentModel = model("Content", ContentSchema);
