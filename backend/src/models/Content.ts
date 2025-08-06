@@ -1,10 +1,16 @@
-import mongoose, { Schema , model } from "mongoose";
+// src/models/Content.ts
+
+import mongoose, { model, Schema } from "mongoose";
 
 const ContentSchema = new Schema({
-    title: String,
-    link: String,
-    tags: [{type: mongoose.Types.ObjectId, ref: 'Tag'}],
-    type: String,
-    userId: {type: mongoose.Types.ObjectId, ref: 'User', required: true },
-})
+    title: { type: String, required: false },
+    link: { type: String, required: true },
+    type: { type: String, required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
+    // New fields for scraped metadata
+    scrapedTitle: { type: String, default: '' },
+    scrapedDescription: { type: String, default: '' },
+    scrapedImage: { type: String, default: '' },
+});
+
 export const ContentModel = model("Content", ContentSchema);

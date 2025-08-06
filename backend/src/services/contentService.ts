@@ -1,6 +1,44 @@
-import { ContentModel } from '../models/Content'; // Import from your consolidated models/index.ts
+// src/services/contentService.ts
+
+import { ContentModel } from '../models/Content';
 import { LinkModel } from '../models/Link';
-import { UserModel } from '../models/User'; // Import from your consolidated models/index.ts or individual Content.ts
+import { UserModel } from '../models/User';
+import axios from 'axios';
+import cheerio from 'cheerio';
+
+
+/**
+ * A new function to scrape a URL for metadata
+ */
+export const scrapeUrlForMetadata = async (url: string) => {
+    try {
+        const { data } = await axios.get(url, {
+            headers: {
+                // A common user-agent header to avoid being blocked by some websites
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+        });
+        const $ = cheerio.load(data);
+
+        const title = $('title').text();
+        const description = $('meta[name="description"]').attr('content') || '';
+        const image = $('meta[property="og:image"]').attr('content') || '';
+
+        return {
+            title,
+            description,
+            image
+        };
+    } catch (error) {
+        console.error(`Error scraping URL ${url}:`, error);
+        return {
+            title: '',
+            description: '',
+            image: ''
+        };
+    }
+};
+
 
 /**
  * Adds new content (link, title, type) for a specific user.
@@ -12,13 +50,19 @@ import { UserModel } from '../models/User'; // Import from your consolidated mod
  */
 export const addContentToBrain = async (link: string, type: string, title: string, userId: string) => {
     try {
+        const metadata = await scrapeUrlForMetadata(link);
+
         const newContent = await ContentModel.create({
             link,
             type,
-            title,
+            title : title || metadata.title, // User provided title if not given then taken from metadata
+            scrapedTitle: metadata.title,
+            scrapedDescription: metadata.description,
+            scrapedImage: metadata.image,
             userId: userId,
-            tags: [] // Tags can be added/managed in a separate service or extended here
+            tags: []
         });
+
         return { success: true, message: "Content added", content: newContent };
     } catch (error) {
         console.error("Error in contentService.addContentToBrain:", error);

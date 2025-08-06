@@ -6,7 +6,7 @@ import zod from "zod";
 const addContentBody = zod.object({
     link: zod.string().url(),
     type: zod.string().min(1),
-    title: zod.string().min(1)
+    title: zod.string().min(1).optional()
 });
 
 // Define the Zod schema for the deleteContent request body
