@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 //@ts-ignore
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_PASSWORD } from "./config";
+import { JWT_PASSWORD } from "../config";
 
 export const userMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const header = req.headers["authorization"];
