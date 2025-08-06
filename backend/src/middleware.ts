@@ -1,4 +1,6 @@
+//@ts-ignore
 import { NextFunction, Request, Response } from "express";
+//@ts-ignore
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_PASSWORD } from "./config";
 
@@ -10,7 +12,7 @@ export const userMiddleware = (req: Request, res: Response, next: NextFunction) 
             res.status(403).json({
                 message: "You are not logged in"
             })
-            return;    
+            return;
         }
         req.userId = (decoded as JwtPayload).id;
         next()
