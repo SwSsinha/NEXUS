@@ -1,4 +1,6 @@
-import { LinkModel, ContentModel, UserModel } from '../models'; // Import from your consolidated models/index.ts
+import { ContentModel } from '../models/Content'; // Import from your consolidated models/index.ts
+import { LinkModel } from '../models/Link';
+import { UserModel } from '../models/User';
 import { random } from '../utils'; // Your utility function for hash generation
 
 /**

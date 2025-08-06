@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { createNewUser, authenticateUser } from '../services/userService';
 import zod from "zod";
 import bcrypt from "bcryptjs"; // Import bcrypt for password hashing
@@ -17,7 +17,7 @@ const signinBody = zod.object({
     password: zod.string()
 });
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response, next: NextFunction) => {
     // 1. Zod validation to ensure a valid request body
     const { success } = signupBody.safeParse(req.body);
 
@@ -47,7 +47,7 @@ export const signup = async (req: Request, res: Response) => {
     }
 };
 
-export const signin = async (req: Request, res: Response) => {
+export const signin = async (req: Request, res: Response, next: NextFunction) => {
     // 1. Zod validation for the signin request body
     const { success } = signinBody.safeParse(req.body);
 

@@ -1,4 +1,6 @@
-import { UserModel } from '../models'; // Import the updated UserModel
+import { ContentModel } from '../models/Content'; // Import from your consolidated models/index.ts
+import { LinkModel } from '../models/Link';
+import { UserModel } from '../models/User'; // Import the updated UserModel
 import jwt from 'jsonwebtoken';
 import { JWT_PASSWORD } from '../config';
 import bcrypt from 'bcryptjs'; // Import bcrypt for comparison

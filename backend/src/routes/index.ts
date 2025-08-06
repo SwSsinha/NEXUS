@@ -1,5 +1,4 @@
 import { Router } from 'express';
-//@ts-ignore
 import { userMiddleware } from '../middleware/userMiddleware';
 
 // Import all your controller functions

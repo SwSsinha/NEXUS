@@ -1,4 +1,6 @@
-import { ContentModel } from '../models'; // Import from your consolidated models/index.ts or individual Content.ts
+import { ContentModel } from '../models/Content'; // Import from your consolidated models/index.ts
+import { LinkModel } from '../models/Link';
+import { UserModel } from '../models/User'; // Import from your consolidated models/index.ts or individual Content.ts
 
 /**
  * Adds new content (link, title, type) for a specific user.

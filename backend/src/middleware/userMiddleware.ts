@@ -1,6 +1,4 @@
-//@ts-ignore
 import { NextFunction, Request, Response } from "express";
-//@ts-ignore
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_PASSWORD } from "../config";
 

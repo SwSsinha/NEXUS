@@ -1,12 +1,31 @@
-import { Request, Response } from 'express';
-import { manageShareLink, getBrainContentByHash } from '../services/brainService'; // Importing service functions
+import { Request, Response, NextFunction } from 'express';
+import { manageShareLink, getBrainContentByHash } from '../services/brainService';
+import zod from "zod";
 
-export const shareBrain = async (req: Request, res: Response) => {
+// Define the Zod schema for the shareBrain request body
+const shareBody = zod.object({
+    share: zod.boolean()
+});
+
+// Define the Zod schema for the getSharedBrain request parameters
+const shareLinkParams = zod.object({
+    shareLink: zod.string().min(1)
+});
+
+export const shareBrain = async (req: Request, res: Response, next: NextFunction) => {
+    const { success } = shareBody.safeParse(req.body);
+
+    if (!success) {
+        return res.status(400).json({ message: "Invalid input. 'share' must be a boolean." });
+    }
+
+    // Explicitly check if userId exists
+    if (!req.userId) {
+        return res.status(401).json({ message: "Unauthorized. User ID not found." });
+    }
+
     const { share } = req.body;
-    // @ts-ignore - userId is attached by userMiddleware
-    const userId = req.userId;
-
-    // TODO: Implement Zod validation for 'share' boolean here
+    const userId = req.userId; // TypeScript now knows userId is a string
 
     const result = await manageShareLink(share, userId); // Calling the service function
 
@@ -21,10 +40,14 @@ export const shareBrain = async (req: Request, res: Response) => {
     }
 };
 
-export const getSharedBrain = async (req: Request, res: Response) => {
-    const { shareLink } = req.params;
+export const getSharedBrain = async (req: Request, res: Response, next: NextFunction) => {
+    const { success } = shareLinkParams.safeParse(req.params);
 
-    // TODO: Implement Zod validation for shareLink here
+    if (!success) {
+        return res.status(400).json({ message: "Invalid share link." });
+    }
+
+    const { shareLink } = req.params;
 
     const result = await getBrainContentByHash(shareLink); // Calling the service function
 
