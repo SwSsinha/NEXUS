@@ -39,7 +39,8 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
         if (result.success) {
             res.status(201).json({ message: result.message });
         } else {
-            res.status(411).json({ message: result.message });
+            // Updated status code to 409 Conflict
+            res.status(409).json({ message: result.message });
         }
     } catch (e) {
         console.error("Signup error:", e);

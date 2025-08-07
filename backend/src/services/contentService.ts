@@ -6,7 +6,6 @@ import { UserModel } from '../models/User';
 import axios from 'axios';
 import cheerio from 'cheerio';
 
-
 /**
  * A new function to scrape a URL for metadata
  */
@@ -18,11 +17,31 @@ export const scrapeUrlForMetadata = async (url: string) => {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
         });
-        const $ = cheerio.load(data);
 
-        const title = $('title').text();
-        const description = $('meta[name="description"]').attr('content') || '';
-        const image = $('meta[property="og:image"]').attr('content') || '';
+        // Ensure data is available before passing it to Cheerio.
+        // Also check if data is a string to prevent issues.
+        if (!data || typeof data !== 'string') {
+            console.error(`Error scraping URL ${url}: No valid HTML data received from the server.`);
+            return {
+                title: '',
+                description: '',
+                image: ''
+            };
+        }
+
+        let title = '';
+        let description = '';
+        let image = '';
+
+        try {
+            const $ = cheerio.load(data);
+            title = $('title').text();
+            description = $('meta[name="description"]').attr('content') || '';
+            image = $('meta[property="og:image"]').attr('content') || '';
+        } catch (cheerioError) {
+            console.error(`Error loading data into Cheerio for URL ${url}:`, cheerioError);
+            // Fall through to return empty metadata
+        }
 
         return {
             title,
@@ -30,6 +49,7 @@ export const scrapeUrlForMetadata = async (url: string) => {
             image
         };
     } catch (error) {
+        // This catch block handles network errors or 403 Forbidden responses from Axios
         console.error(`Error scraping URL ${url}:`, error);
         return {
             title: '',
@@ -38,7 +58,6 @@ export const scrapeUrlForMetadata = async (url: string) => {
         };
     }
 };
-
 
 /**
  * Adds new content (link, title, type) for a specific user.
