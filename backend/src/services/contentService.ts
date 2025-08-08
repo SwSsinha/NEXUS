@@ -7,21 +7,25 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 
 /**
- * Adds new content (link, title, type) for a specific user.
+ * Adds new content (link, title, type, and now description) for a specific user.
  *
  * @param link - The URL link for the content.
  * @param type - The type of content (e.g., "article", "video").
  * @param title - The title of the content. This is a required field.
+ * @param description - The description of the content. (This is the new field)
  * @param userId - The ID of the user adding the content.
  * @param tags - An optional array of tags for the content.
  * @returns An object indicating success/failure and a message.
  */
-export const addContentToBrain = async (link: string, type: string, title: string, userId: string, tags?: string[]) => {
+// FIX: Added the 'description' parameter to the function signature
+export const addContentToBrain = async (link: string, type: string, title: string, description: string, userId: string, tags?: string[]) => {
     try {
+        // FIX: Added the 'description' field to the object being created
         const newContent = await ContentModel.create({
             link,
             type,
             title,
+            description, 
             userId: userId,
             tags: tags || []
         });

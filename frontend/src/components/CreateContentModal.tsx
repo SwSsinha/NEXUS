@@ -3,7 +3,6 @@ import { CrossIcon } from "../icons/CrossIcon";
 import { Button } from "./Button";
 import { Input } from "./Input";
 import { BACKEND_URL } from "../config";
-//@ts-ignore
 import axios from "axios";
 import { PlusIcon } from "../icons/PlusIcon";
 
@@ -11,10 +10,18 @@ enum ContentType {
     Youtube = "youtube",
     Twitter = "twitter"
 }
-//@ts-ignore
-export function CreateContentModal({ open, onClose, refreshContent }) {
+
+interface CreateContentModalProps {
+    open: boolean;
+    onClose: () => void;
+    refreshContent: () => void;
+}
+
+export function CreateContentModal({ open, onClose, refreshContent }: CreateContentModalProps) {
+    // New ref for the description input field
     const titleRef = useRef<HTMLInputElement>(null);
     const linkRef = useRef<HTMLInputElement>(null);
+    const descriptionRef = useRef<HTMLInputElement>(null);
     const [type, setType] = useState(ContentType.Youtube);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -23,13 +30,14 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
         setLoading(true);
         setError(null);
 
-        // Get values from input fields
+        // Get values from all input fields
         const link = linkRef.current?.value;
         const title = titleRef.current?.value;
+        const description = descriptionRef.current?.value;
 
-        // Check for both required fields
-        if (!link || !title) {
-            setError("Both Link and Title are required fields.");
+        // Now checking for all three required fields
+        if (!link || !title || !description) {
+            setError("Link, Title, and Description are all required fields.");
             setLoading(false);
             return;
         }
@@ -40,10 +48,11 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
                 throw new Error("Authentication token not found.");
             }
 
-            // Create the payload with both link and title
+            // Create the payload with all three fields
             const payload = {
                 link,
                 title,
+                description, // Included the new description field in the payload
                 type
             };
             
@@ -88,6 +97,8 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
                 <div className="space-y-4">
                     <Input reference={titleRef} placeholder={"Title"} />
                     <Input reference={linkRef} placeholder={"Link"} />
+                    {/* New input field for the description */}
+                    <Input reference={descriptionRef} placeholder={"Description"} />
                 </div>
                 
                 <div className="mt-6">
@@ -106,7 +117,14 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
                     </div>
                 </div>
                 
-                <div className="flex justify-center mt-6">
+                <div className="flex justify-between items-center mt-6 gap-4">
+                    {/* New "Cancel" button */}
+                    <Button 
+                        onClick={onClose} 
+                        variant="secondary" 
+                        text="Cancel" 
+                        fullWidth={true}
+                    />
                     <Button 
                         onClick={addContent} 
                         variant="primary" 

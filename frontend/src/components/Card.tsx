@@ -1,17 +1,17 @@
+import { useState } from 'react';
 import { CrossIcon } from "../icons/CrossIcon";
 import { ShareIcon } from "../icons/ShareIcon";
 import { TwitterIcon } from "../icons/TwitterIcon";
 import { YoutubeIcon } from "../icons/YoutubeIcon";
 import { Button } from "./Button";
 
+// The Content interface has been updated to use the description field
 interface Content {
     _id: string;
     link: string;
     type: string;
     title: string;
-    scrapedTitle: string;
-    scrapedDescription: string;
-    scrapedImage: string;
+    description: string;
     tags: string[];
 }
 
@@ -38,28 +38,33 @@ const getIconForType = (type: string) => {
 };
 
 export function Card({ content, deleteContent }: CardProps) {
+    // State to control the visibility of the confirmation modal
+    const [showModal, setShowModal] = useState(false);
+
+    // Function to handle the deletion after confirmation
+    const handleDeleteConfirmation = () => {
+        deleteContent(content._id);
+        setShowModal(false);
+    };
+
     return (
         <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-            <div className="relative">
-                {/* Fallback image if scrapedImage is not available */}
-                <img
-                    className="w-full h-48 object-cover"
-                    src={content.scrapedImage || `https://placehold.co/600x400/E5E7EB/4B5563?text=No+Image`}
-                    alt={content.scrapedTitle || content.title}
-                />
-                
-                {/* Conditionally render the social media icon */}
-                <div className="absolute top-4 left-4 p-2 bg-white rounded-full shadow-md">
+            <div className="relative p-6">
+                {/* The icon for the platform is in the top right corner */}
+                <div className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md">
                     {getIconForType(content.type)}
                 </div>
-            </div>
+                
+                {/* The title is a clickable link that opens in a new tab */}
+                <a href={content.link} target="_blank" rel="noopener noreferrer">
+                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-2 hover:underline">
+                        {content.title}
+                    </h3>
+                </a>
 
-            <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
-                    {content.scrapedTitle || content.title}
-                </h3>
+                {/* The description is displayed here, using a generic description field. */}
                 <p className="mt-2 text-sm text-gray-500 line-clamp-3">
-                    {content.scrapedDescription || "No description available."}
+                    {content.description || "No description available."}
                 </p>
 
                 <div className="mt-4 flex space-x-2">
@@ -72,8 +77,7 @@ export function Card({ content, deleteContent }: CardProps) {
 
                 <div className="mt-6 flex justify-between items-center">
                     <Button 
-                    //@ts-ignore
-                        variant="ghost"
+                        variant="secondary"
                         text="Share" 
                         startIcon={<ShareIcon />}
                         onClick={() => { /* TODO: Implement share functionality */ }} 
@@ -82,10 +86,35 @@ export function Card({ content, deleteContent }: CardProps) {
                         variant="danger"
                         text="Delete"
                         startIcon={<CrossIcon />}
-                        onClick={() => deleteContent(content._id)}
+                        // When the delete button is clicked, we show the modal
+                        onClick={() => setShowModal(true)}
                     />
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+                        <h4 className="text-lg font-semibold text-gray-900">Are you sure?</h4>
+                        <p className="mt-2 text-sm text-gray-500">
+                            Do you really want to delete this content? This action cannot be undone.
+                        </p>
+                        <div className="mt-4 flex justify-end space-x-3">
+                            <Button
+                                variant="secondary"
+                                text="Cancel"
+                                onClick={() => setShowModal(false)}
+                            />
+                            <Button
+                                variant="danger"
+                                text="Delete"
+                                onClick={handleDeleteConfirmation}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
