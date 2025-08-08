@@ -12,7 +12,10 @@ export const userMiddleware = (req: Request, res: Response, next: NextFunction) 
     }
 
     try {
-        const decoded = jwt.verify(header, JWT_PASSWORD);
+        // Handle Bearer token format
+        const token = header.startsWith('Bearer ') ? header.substring(7) : header;
+        
+        const decoded = jwt.verify(token, JWT_PASSWORD);
         if (decoded) {
             if (typeof decoded === "string") {
                 return res.status(403).json({

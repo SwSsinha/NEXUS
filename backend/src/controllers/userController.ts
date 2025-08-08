@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createNewUser, authenticateUser } from '../services/userService';
+import { createNewUser, authenticateUser, getUserProfile, updateUserProfile, updateUserPassword } from '../services/userService';
 import zod from "zod";
 import bcrypt from "bcryptjs"; // Import bcrypt for password hashing
 
@@ -15,6 +15,18 @@ const signupBody = zod.object({
 const signinBody = zod.object({
     username: zod.string().email(),
     password: zod.string()
+});
+
+// Define the Zod schema for updating user profile
+const updateProfileBody = zod.object({
+    firstName: zod.string().max(50),
+    lastName: zod.string().max(50)
+});
+
+// Define the Zod schema for updating password
+const updatePasswordBody = zod.object({
+    currentPassword: zod.string(),
+    newPassword: zod.string().min(6)
 });
 
 export const signup = async (req: Request, res: Response, next: NextFunction) => {
@@ -70,5 +82,71 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
     } catch (e) {
         console.error("Signin error:", e);
         res.status(500).json({ message: "An internal server error occurred during signin" });
+    }
+};
+
+export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.userId as string;
+        const result = await getUserProfile(userId);
+
+        if (result.success) {
+            res.json({ user: result.user });
+        } else {
+            res.status(404).json({ message: result.message });
+        }
+    } catch (e) {
+        console.error("Get profile error:", e);
+        res.status(500).json({ message: "An internal server error occurred while fetching profile" });
+    }
+};
+
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+    // 1. Zod validation for the update profile request body
+    const { success } = updateProfileBody.safeParse(req.body);
+
+    if (!success) {
+        return res.status(400).json({ message: "Invalid inputs" });
+    }
+
+    const { firstName, lastName } = req.body;
+    const userId = req.userId as string;
+
+    try {
+        const result = await updateUserProfile(userId, firstName, lastName);
+
+        if (result.success) {
+            res.json({ message: result.message, user: result.user });
+        } else {
+            res.status(400).json({ message: result.message });
+        }
+    } catch (e) {
+        console.error("Update profile error:", e);
+        res.status(500).json({ message: "An internal server error occurred while updating profile" });
+    }
+};
+
+export const updatePassword = async (req: Request, res: Response, next: NextFunction) => {
+    // 1. Zod validation for the update password request body
+    const { success } = updatePasswordBody.safeParse(req.body);
+
+    if (!success) {
+        return res.status(400).json({ message: "Invalid inputs" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.userId as string;
+
+    try {
+        const result = await updateUserPassword(userId, currentPassword, newPassword);
+
+        if (result.success) {
+            res.json({ message: result.message });
+        } else {
+            res.status(400).json({ message: result.message });
+        }
+    } catch (e) {
+        console.error("Update password error:", e);
+        res.status(500).json({ message: "An internal server error occurred while updating password" });
     }
 };

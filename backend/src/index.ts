@@ -4,13 +4,18 @@ import router from "./routes/index";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { MONGO_URL } from "./config";
-mongoose.connect("mongodb+srv://sws23sinha4217:f1zNGStsWp46wBHT@cluster0.f4xbcqv.mongodb.net/").then(() => console.log("MongoDB connected successfully."))
+
+// Load environment variables first
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Connect to MongoDB
+mongoose.connect(MONGO_URL)
+    .then(() => console.log("MongoDB connected successfully."))
+    .catch((error) => console.error("MongoDB connection error:", error));
 
 app.use("/api", router);
 

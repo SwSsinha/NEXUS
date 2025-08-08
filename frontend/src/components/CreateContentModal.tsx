@@ -56,19 +56,27 @@ export function CreateContentModal({ open, onClose, refreshContent }: CreateCont
                 type
             };
             
-            await axios.post(`${BACKEND_URL}/api/v1/content`, payload, {
+            await axios.post(`${BACKEND_URL}/v1/content`, payload, {
                 headers: {
-                    "Authorization": `${token}`
+                    "Authorization": `Bearer ${token}`
                 }
             });
 
             // After successful post, refresh the content list
             refreshContent();
             onClose();
+            
+            // Clear the form
+            if (titleRef.current) titleRef.current.value = '';
+            if (linkRef.current) linkRef.current.value = '';
+            if (descriptionRef.current) descriptionRef.current.value = '';
         } catch (e: any) {
             console.error("Error adding content:", e);
             // Updated error handling to show specific backend message if available
-            if (e.response && e.response.data && e.response.data.message) {
+            if (e.response?.status === 401) {
+                setError("Session expired. Please sign in again.");
+                localStorage.removeItem("token");
+            } else if (e.response?.data?.message) {
                 setError(`Error adding content: ${e.response.data.message}`);
             } else {
                 setError("Failed to add content. Please check the link and title and try again.");

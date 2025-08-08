@@ -10,16 +10,18 @@ export const Signup = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setMessage('');
+        setLoading(true);
 
         try {
             // Using axios.post which handles JSON serialization and headers automatically
-            const response = await axios.post(`${BACKEND_URL}/api/v1/signup`, {
+            const response = await axios.post(`${BACKEND_URL}/v1/signup`, {
                 firstName,
                 lastName,
                 username,
@@ -38,6 +40,8 @@ export const Signup = () => {
             } else {
                 setError('An unexpected error occurred. Please try again.');
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -58,6 +62,7 @@ export const Signup = () => {
                                 className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                 placeholder="John"
                                 required
+                                disabled={loading}
                             />
                         </div>
                         <div>
@@ -69,6 +74,7 @@ export const Signup = () => {
                                 className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                                 placeholder="Doe"
                                 required
+                                disabled={loading}
                             />
                         </div>
                     </div>
@@ -81,6 +87,7 @@ export const Signup = () => {
                             className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                             placeholder="user@example.com"
                             required
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -92,13 +99,15 @@ export const Signup = () => {
                             className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                             placeholder="Password (min 6 characters)"
                             required
+                            disabled={loading}
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                        disabled={loading}
+                        className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Sign Up
+                        {loading ? 'Creating Account...' : 'Sign Up'}
                     </button>
                     <p className="text-center text-gray-600">
                         Already have an account? <Link to="/signin" className="text-indigo-600 font-semibold hover:underline">Sign In</Link>

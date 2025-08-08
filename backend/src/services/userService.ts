@@ -50,3 +50,84 @@ export const authenticateUser = async (username: string, password: string) => {
     }
     return { success: false, message: "Incorrect credentials" };
 };
+
+/**
+ * Gets a user's profile information by user ID.
+ * @param userId - The ID of the user to fetch.
+ * @returns An object indicating success/failure and user data or message.
+ */
+export const getUserProfile = async (userId: string) => {
+    try {
+        const user = await UserModel.findById(userId).select('-password');
+        
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        return { success: true, user };
+    } catch (e) {
+        console.error("Error in userService.getUserProfile:", e);
+        return { success: false, message: "Failed to fetch user profile" };
+    }
+};
+
+/**
+ * Updates a user's profile information.
+ * @param userId - The ID of the user to update.
+ * @param firstName - The new first name.
+ * @param lastName - The new last name.
+ * @returns An object indicating success/failure and updated user data or message.
+ */
+export const updateUserProfile = async (userId: string, firstName: string, lastName: string) => {
+    try {
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            { firstName, lastName },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedUser) {
+            return { success: false, message: "User not found" };
+        }
+
+        return { success: true, message: "Profile updated successfully", user: updatedUser };
+    } catch (e) {
+        console.error("Error in userService.updateUserProfile:", e);
+        return { success: false, message: "Failed to update profile" };
+    }
+};
+
+/**
+ * Updates a user's password.
+ * @param userId - The ID of the user to update.
+ * @param currentPassword - The current password for verification.
+ * @param newPassword - The new password to set.
+ * @returns An object indicating success/failure and message.
+ */
+export const updateUserPassword = async (userId: string, currentPassword: string, newPassword: string) => {
+    try {
+        const user = await UserModel.findById(userId);
+        
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        // Verify current password
+        const isCurrentPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordCorrect) {
+            return { success: false, message: "Current password is incorrect" };
+        }
+
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update the password
+        await UserModel.findByIdAndUpdate(userId, { password: hashedNewPassword });
+
+        return { success: true, message: "Password updated successfully" };
+    } catch (e) {
+        console.error("Error in userService.updateUserPassword:", e);
+        return { success: false, message: "Failed to update password" };
+    }
+};

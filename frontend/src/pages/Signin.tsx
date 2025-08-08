@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 import { BACKEND_URL } from '../config';
 
 export const Signin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUser();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/v1/signin`, {
+            const response = await fetch(`${BACKEND_URL}/v1/signin`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,12 +29,28 @@ export const Signin = () => {
             if (response.ok) {
                 // Save the token to local storage
                 localStorage.setItem('token', data.token);
+                
+                // Fetch user profile to set user context
+                const profileResponse = await fetch(`${BACKEND_URL}/v1/user/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${data.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (profileResponse.ok) {
+                    const profileData = await profileResponse.json();
+                    setUser(profileData.user);
+                }
+                
                 navigate('/dashboard');
             } else {
                 setError(data.message || 'Login failed. Please check your credentials.');
             }
         } catch (err) {
             setError('An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -49,6 +69,7 @@ export const Signin = () => {
                             className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                             placeholder="user@example.com"
                             required
+                            disabled={loading}
                         />
                     </div>
                     <div>
@@ -60,13 +81,15 @@ export const Signin = () => {
                             className="w-full p-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-indigo-500"
                             placeholder="Password"
                             required
+                            disabled={loading}
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                        disabled={loading}
+                        className="w-full bg-indigo-600 text-white p-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Sign In
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                     <p className="text-center text-gray-600">
                         Don't have an account? <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">Sign Up</Link>
@@ -76,5 +99,3 @@ export const Signin = () => {
         </div>
     );
 };
-
-//export default Signin;

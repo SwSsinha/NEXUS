@@ -7,6 +7,7 @@ interface ButtonProps {
     onClick?: () => void;
     fullWidth?: boolean;
     loading?: boolean;
+    disabled?: boolean;
     type?: "button" | "submit" | "reset";
 }
 
@@ -18,12 +19,13 @@ const variantClasses = {
 
 const defaultStyles = "px-4 py-2 rounded-lg font-semibold flex items-center justify-center shadow-sm";
 
-export function Button({ variant, text, startIcon, onClick, fullWidth, loading, type = "button" }: ButtonProps) {
+export function Button({ variant, text, startIcon, onClick, fullWidth, loading, disabled, type = "button" }: ButtonProps) {
+    const isDisabled = loading || disabled;
     return (
         <button 
             onClick={onClick} 
-            className={`${defaultStyles} ${variantClasses[variant]} ${fullWidth ? "w-full" : ""} ${loading ? "opacity-60 cursor-not-allowed" : ""}`} 
-            disabled={loading}
+            className={`${defaultStyles} ${variantClasses[variant]} ${fullWidth ? "w-full" : ""} ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`} 
+            disabled={isDisabled}
             type={type}
         >
             {startIcon && <div className="pr-2">{startIcon}</div>}
