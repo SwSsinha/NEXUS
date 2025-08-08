@@ -6,7 +6,7 @@ import zod from "zod";
 const addContentBody = zod.object({
     link: zod.string().url(),
     type: zod.string().min(1),
-    title: zod.string().min(1).optional(),
+    title: zod.string().min(1), // Title is now a required field
     tags: zod.array(zod.string()).optional()
 });
 

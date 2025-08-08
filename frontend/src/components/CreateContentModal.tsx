@@ -27,9 +27,9 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
         const link = linkRef.current?.value;
         const title = titleRef.current?.value;
 
-        // Check for required link field
-        if (!link) {
-            setError("Link is a required field.");
+        // Check for both required fields
+        if (!link || !title) {
+            setError("Both Link and Title are required fields.");
             setLoading(false);
             return;
         }
@@ -40,17 +40,13 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
                 throw new Error("Authentication token not found.");
             }
 
-            // Create the payload and conditionally add the title field
+            // Create the payload with both link and title
             const payload = {
                 link,
+                title,
                 type
             };
-            if (title) {
-                // Only add the title if it's a non-empty string
-                //@ts-ignore
-                payload.title = title;
-            }
-
+            
             await axios.post(`${BACKEND_URL}/api/v1/content`, payload, {
                 headers: {
                     "Authorization": `${token}`
@@ -66,7 +62,7 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
             if (e.response && e.response.data && e.response.data.message) {
                 setError(`Error adding content: ${e.response.data.message}`);
             } else {
-                setError("Failed to add content. Please check the link and try again.");
+                setError("Failed to add content. Please check the link and title and try again.");
             }
         } finally {
             setLoading(false);
@@ -90,7 +86,7 @@ export function CreateContentModal({ open, onClose, refreshContent }) {
                 {error && <p className="text-red-500 text-center mb-4">{error}</p>}
                 
                 <div className="space-y-4">
-                    <Input reference={titleRef} placeholder={"Title (Optional)"} />
+                    <Input reference={titleRef} placeholder={"Title"} />
                     <Input reference={linkRef} placeholder={"Link"} />
                 </div>
                 
