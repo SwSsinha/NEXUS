@@ -1,24 +1,33 @@
 import express from "express";
 import cors from "cors";
 import router from "./routes/index";
-import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { MONGO_URL } from "./config";
-
-// Load environment variables first
-dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Connect to MongoDB
-mongoose.connect(MONGO_URL)
-    .then(() => console.log("MongoDB connected successfully."))
-    .catch((error) => console.error("MongoDB connection error:", error));
-
 app.use("/api", router);
 
-app.listen(3000, () => {
-    console.log("Server is running on port 3000");
-});
+async function startServer(): Promise<void> {
+    try {
+        if (!MONGO_URL) {
+            console.error("MONGO_URL is not set. Create a .env file with MONGO_URL and JWT_PASSWORD.");
+            process.exit(1);
+        }
+
+        await mongoose.connect(MONGO_URL);
+        console.log("MongoDB connected successfully.");
+
+        const PORT = process.env.PORT || 3000;
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("MongoDB connection error:", error);
+        process.exit(1);
+    }
+}
+
+startServer();

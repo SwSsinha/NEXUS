@@ -2,6 +2,7 @@
 import { Signin } from "./pages/Signin"
 //@ts-ignore
 import { Signup } from "./pages/Signup"
+import { Landing } from "./pages/Landing"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Dashboard } from "./pages/dashboard"
 import { Profile } from "./pages/Profile"
@@ -13,7 +14,7 @@ function App() {
     <UserProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element = {<Signup/>} />
+          <Route path="/" element={<Landing />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/dashboard" element={
