@@ -17,7 +17,7 @@ async function startServer(): Promise<void> {
             process.exit(1);
         }
 
-        await mongoose.connect(MONGO_URL);
+        await mongoose.connect("mongodb+srv://sws23sinha4217:FFbsOHUftEVNq0GZ@cluster0.f4xbcqv.mongodb.net/");
         console.log("MongoDB connected successfully.");
 
         const PORT = process.env.PORT || 3000;
